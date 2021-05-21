@@ -47,7 +47,7 @@ services:
     command: >
       /bin/sh -c '
       sleep 10;
-      wp core install --path="/var/www/html" --url="http://localhost" --title="Headless Wordpress" --admin_user=admin --admin_password=dataprev00 --admin_email=admin@example.com;
+      wp core install --path="/var/www/html" --url="http://localhost" --title="${WP_TITLE}" --admin_user=${WP_USER} --admin_password=${WP_PASS} --admin_email=${WP_EMAIL};
       wp plugin install wp-graphql --activate
       '
     volumes:

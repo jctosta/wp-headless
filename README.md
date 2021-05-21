@@ -12,6 +12,10 @@ Create an .env file on the project root folder and set the following environment
 DB_NAME=dbname
 DB_USER=dbuser
 DB_PASSWORD=dbpass
+WP_USER=admin
+WP_PASS=adminPWD
+WP_TITLE=Headless Wordpress
+WP_EMAIL=admin@example.com
 ```
 
 Change accordingly to your needs.
