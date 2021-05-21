@@ -1,0 +1,76 @@
+version: '3.1'
+
+services:
+
+  db:
+    image: mysql:5.7
+    restart: always
+    environment:
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER: ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      MYSQL_RANDOM_ROOT_PASSWORD: '1'
+    volumes:
+      - ${HOME}/db:/var/lib/mysql
+
+  wordpress:
+    depends_on: 
+      - db
+    # build:
+    #   dockerfile: wordpress.dockerfile
+    #   context: .
+    image: wordpress
+    restart: always
+    ports:
+      - 80:80
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: ${DB_USER}
+      WORDPRESS_DB_PASSWORD: ${DB_PASSWORD}
+      WORDPRESS_DB_NAME: ${DB_NAME}
+    volumes:
+      - ${HOME}/wordpress:/var/www/html
+    expose: 
+      - "80"
+
+  wpcli:
+    depends_on: 
+      - db
+      - wordpress
+    image: wordpress:cli
+    user: xfs
+    environment:
+      WORDPRESS_DB_HOST: db
+      WORDPRESS_DB_USER: ${DB_USER}
+      WORDPRESS_DB_PASSWORD: ${DB_PASSWORD}
+      WORDPRESS_DB_NAME: ${DB_NAME}
+    command: >
+      /bin/sh -c '
+      sleep 10;
+      wp core install --path="/var/www/html" --url="http://localhost" --title="Headless Wordpress" --admin_user=admin --admin_password=dataprev00 --admin_email=admin@example.com;
+      wp plugin install wp-graphql --activate
+      '
+    volumes:
+      - ${HOME}/wordpress:/var/www/html
+    links: 
+      - db
+  
+  headless:
+    depends_on: 
+      - db
+      - wordpress
+      - wpcli
+    build:
+      dockerfile: app.dockerfile
+      context: .
+    restart: always
+    ports:
+      - 3000:3000
+    environment:
+      WORDPRESS_API_URL: "http://wordpress/index.php?graphql"
+    links:
+      - wordpress
+
+volumes:
+  db:
+  wordpress:
